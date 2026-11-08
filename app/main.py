@@ -3,7 +3,11 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.routers import projects, tasks
+from app.database import engine
+from app import models
 
+# Crea las tablas en la base de datos SQLite si no existen
+models.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="TaskFlow API",
     description="API modularizada con Middleware y Manejo de Excepciones - Práctica 1.4",

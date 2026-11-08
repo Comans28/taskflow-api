@@ -31,3 +31,20 @@
 ### Documentación en Swagger
 Vista de la API con los endpoints organizados y agrupados por recursos:
 ![Swagger APIRouter](cap3.png)
+---
+
+## Práctica 1.4 — Middleware y Manejo de Excepciones
+
+### Comportamiento Transversal y Seguridad
+* **CORS Middleware:** Configurado mediante `CORSMiddleware` para permitir peticiones desde el origen del frontend (`http://localhost:5173`), habilitando los métodos y cabeceras necesarios para la integración cliente-servidor.
+* **Middleware Personalizado (`X-Process-Time`):** Intercepta de forma transversal las peticiones HTTP para calcular el tiempo de procesamiento y añade la cabecera `X-Process-Time` con la duración en milisegundos en cada respuesta.
+* **Manejador Global de Excepciones:** Captura cualquier excepción no controlada (`Exception`) a nivel global, evitando la exposición del *stacktrace* interno del servidor y devolviendo una respuesta segura con código `500 Internal Server Error` y un formato JSON estandarizado[cite: 16].
+
+### Pruebas y Capturas
+
+1. **Cabecera `X-Process-Time` (Inspección en DevTools / Red):**
+   *(Asegúrate de guardar tu captura de la cabecera con este nombre o el que prefieras en la raíz del proyecto)*
+   ![X-Process-Time](capn.png)
+
+2. **Manejo Global de Excepciones (`/error-test` - Código 500):**
+   ![Manejo de Errores 500](cape.png)

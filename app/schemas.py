@@ -1,64 +1,90 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, EmailStr
 
-# NOTA ARQUITECTÓNICA (Contrato de API vs Persistencia):
-# Los schemas definen el contrato de entrada/salida de la API (validación JSON),
-# separándolo de los modelos de base de datos (que gestionan la persistencia en tablas).
+# --- SCHEMAS DE USUARIO ---
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
 
+class UserCreate(UserBase):
+    pass
 
-class ProjectCreate(BaseModel):
-    """Schema de entrada para crear un proyecto."""
-    name: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        description="Nombre del proyecto",
-        examples=["Rediseño Web TaskFlow"]
-    )
-    description: Optional[str] = Field(
-        default=None,
-        max_length=500,
-        description="Descripción opcional del proyecto",
-        examples=["Migración del backend a FastAPI"]
-    )
+class UserRead(UserBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
-class ProjectRead(ProjectCreate):
-    """Schema de salida para leer un proyecto."""
-    id: int = Field(..., description="ID único del proyecto", examples=[1])
-    created_at: datetime = Field(..., description="Fecha de creación")
+# --- SCHEMAS DE CATEGORÍA ---
+class CategoryBase(BaseModel):
+    name: str
 
-    model_config = ConfigDict(from_attributes=True)
+class CategoryCreate(CategoryBase):
+    pass
 
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = None
 
-class TaskCreate(BaseModel):
-    """Schema de entrada para crear una tarea."""
-    title: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        description="Título de la tarea (1 a 100 caracteres)",
-        examples=["Modelado con Pydantic"]
-    )
-    description: Optional[str] = Field(
-        default=None,
-        max_length=500,
-        description="Descripción opcional de la tarea",
-        examples=["Crear schemas TaskCreate y TaskRead"]
-    )
-    project_id: int = Field(
-        ...,
-        gt=0,
-        description="ID del proyecto asociado",
-        examples=[1]
-    )
+class CategoryRead(CategoryBase):
+    id: int
+
+    class Config:
+        from_attributes = True
 
 
-class TaskRead(TaskCreate):
-    """Schema de salida para leer una tarea."""
-    id: int = Field(..., description="ID único de la tarea", examples=[1])
-    completed: bool = Field(default=False, description="Estado de la tarea")
-    created_at: datetime = Field(..., description="Fecha de creación")
+# --- SCHEMAS DE TAREA ---
+class TaskBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    completed: bool = False
+    project_id: int
+    category_id: Optional[int] = None
 
-    model_config = ConfigDict(from_attributes=True)
+class TaskCreate(TaskBase):
+    pass
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    project_id: Optional[int] = None
+    category_id: Optional[int] = None
+
+class TaskRead(TaskBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# --- SCHEMAS DE PROYECTO ---
+class ProjectBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class ProjectCreate(ProjectBase):
+    pass
+
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+class ProjectRead(ProjectBase):
+    id: int
+    created_at: datetime
+    tasks: list[TaskRead] = []  # Permite listar las tareas asociadas al proyecto
+
+    class Config:
+        from_attributes = True
+
+
+# Actualizamos la referencia circular de CategoryRead para que devuelva sus tareas asociadas
+class CategoryReadWithTasks(CategoryRead):
+    tasks: list[TaskRead] = []
+
+    class Config:
+        from_attributes = True

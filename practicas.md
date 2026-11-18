@@ -48,3 +48,4 @@ Vista de la API con los endpoints organizados y agrupados por recursos:
 
 2. **Manejo Global de Excepciones (`/error-test` - Código 500):**
    ![Manejo de Errores 500](cape.png)
+  
